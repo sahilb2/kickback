@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path, re_path
 
 from django.contrib import admin
 
@@ -18,5 +18,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 
     path("", kickback.apps.core.views.index, name="index"),
-    path("db/", kickback.apps.core.views.db, name="db"),
+    re_path(r'^search/$', kickback.apps.core.views.search, name="search"),
 ]

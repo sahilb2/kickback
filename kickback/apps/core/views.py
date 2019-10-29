@@ -1,19 +1,17 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.views.decorators.http import require_http_methods
+import json
+from kickback.apps.core.manager.search import search_tracks_by_query
 
-from .models import Greeting
+from .models import User, Sessions, SessionSongs
 
-# Create your views here.
 def index(request):
-    # return HttpResponse('Hello from Python!')
-    return render(request, "index.html")
+    return HttpResponse('Team Frabric presents Kickback Backend!')
 
-
-def db(request):
-
-    greeting = Greeting()
-    greeting.save()
-
-    greetings = Greeting.objects.all()
-
-    return render(request, "db.html", {"greetings": greetings})
+def search(request):
+    query = request.GET.get('q')
+    if query is None or query == '':
+        return HttpResponseBadRequest('Use paramter \'q\' to specify query for the search')
+    tracks = search_tracks_by_query(query)
+    return HttpResponse(json.dumps(tracks), content_type='application/json')
