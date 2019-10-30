@@ -25,5 +25,11 @@ def search_tracks_by_query(track_query):
         curr_track_info['artists'] = artist_name_list
         # Store album name
         curr_track_info['album'] = track['album']['name']
+        try:
+            # Get the 300 by 300 pixels album image
+            album_image = track['album']['images'][1]['url']
+        except:
+            album_image = ''
+        curr_track_info['album_image'] = album_image
         tracks_list.append(curr_track_info)
     return tracks_list
