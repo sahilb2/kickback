@@ -15,3 +15,4 @@ class SessionSongs(models.Model):
     spotify_uri = models.CharField(max_length=22, blank=False, verbose_name='Song URI')
     next_song_id = models.IntegerField(blank=True, null=True, verbose_name='Next Song ID')
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=False, verbose_name='Added By User')
+    is_curr_song = models.BooleanField(default=False, verbose_name='Is Current Song')
