@@ -1,7 +1,7 @@
 from .models import SessionSongs
 from django.db import connection
 
-def move_tracks_in_queue(session_id, move_song_id, after_song_id):
+def move_track_in_queue(session_id, move_song_id, after_song_id):
     with connection.cursor() as cursor:
         cursor.execute("""UPDATE core_sessionsongs SET next_song_id = 
                          (SELECT s.next_song_id FROM core_sessionsongs s WHERE s.session_id = %s AND s.song_id = %s)
