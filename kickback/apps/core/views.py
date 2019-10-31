@@ -15,3 +15,15 @@ def search(request):
         return HttpResponseBadRequest('Use paramter \'q\' to specify query for the search')
     tracks = search_tracks_by_query(query)
     return HttpResponse(json.dumps(tracks), content_type='application/json')
+
+def add_song(request):
+    return HttpResponse('Add Song Endpoint')
+
+def move_song(request):
+    return HttpResponse('Move Song Endpoint')
+
+def delete_song(request):
+    return HttpResponse('Delete Song Endpoint')
+
+def get_queue(request):
+    return HttpResponse('Get Queue Endpoint')

@@ -19,4 +19,8 @@ urlpatterns = [
 
     path("", kickback.apps.core.views.index, name="index"),
     re_path(r'^search/$', kickback.apps.core.views.search, name="search"),
+    re_path(r'^add_song/$', kickback.apps.core.views.add_song, name="add_song"),
+    re_path(r'^move_song/$', kickback.apps.core.views.move_song, name="move_song"),
+    re_path(r'^delete_song/$', kickback.apps.core.views.delete_song, name="delete_song"),
+    re_path(r'^get_queue/$', kickback.apps.core.views.get_queue, name="get_queue"),
 ]
