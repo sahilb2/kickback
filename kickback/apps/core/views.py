@@ -5,7 +5,7 @@ from django.db import transaction, connection
 import json
 from kickback.apps.core.manager.helper import is_string_valid
 from kickback.apps.core.manager.search import search_tracks_by_query
-from kickback.apps.core.manager.getQueue import get_tracks_in_queue
+from kickback.apps.core.manager.get_queue import get_tracks_in_queue
 
 from .models import User, Sessions, SessionSongs
 
@@ -34,8 +34,8 @@ def add_song(request):
     with connection.cursor() as cursor:
         # Set is_curr_song to True if this is the only song in the queue, meaning no last song is found
         is_curr_song = 'TRUE' if len(last_song_query_results) == 0 else 'FALSE'
-        cursor.execute('INSERT INTO core_sessionsongs(session_id_id, spotify_uri, user_id, is_curr_song) VALUES (%s, %s, %s, TRUE)',
-            [session_id, spotify_uri, user_id])
+        cursor.execute('INSERT INTO core_sessionsongs(session_id_id, spotify_uri, user_id, is_curr_song) VALUES (%s, %s, %s, %s)',
+            [session_id, spotify_uri, user_id, is_curr_song])
         if len(last_song_query_results) == 1:
             # Update old last song's next
             last_song_id = last_song_query_results[0].song_id
@@ -50,8 +50,8 @@ def delete_song(request):
     return HttpResponse('Delete Song Endpoint')
 
 def get_queue(request):
-    sessionId = request.GET.get('q')
-    if sessionId is None or sessionId == '':
-        return HttpResponseBadRequest('Use paramter \'q\' to specify sessionId for the queue')
-    tracks = get_tracks_in_queue(sessionId)
+    session_id = request.GET.get('session_id')
+    if not is_string_valid(session_id):
+        return HttpResponseBadRequest('Use paramter \'session_id\' to specify session_id for the queue')
+    tracks = get_tracks_in_queue(session_id)
     return HttpResponse(json.dumps(tracks), content_type='application/json')
