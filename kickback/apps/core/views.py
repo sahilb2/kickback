@@ -26,4 +26,7 @@ def delete_song(request):
     return HttpResponse('Delete Song Endpoint')
 
 def get_queue(request):
+    query = request.GET.get('q')
+    if query is None or query == '':
+        return HttpResponseBadRequest('Use paramter \'q\' to specify query for the search')
     return HttpResponse('Get Queue Endpoint')
