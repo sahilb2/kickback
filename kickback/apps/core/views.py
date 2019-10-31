@@ -7,7 +7,7 @@ from kickback.apps.core.manager.helper import is_string_valid
 from kickback.apps.core.manager.search import search_tracks_by_query
 from kickback.apps.core.manager.get_queue import get_tracks_in_queue
 from kickback.apps.core.manager.moveSong import move_track_in_queue
-from kickback.apps.core.manager.deleteSong import delete_track_in_queue
+from kickback.apps.core.manager.delete_song import delete_track_in_queue
 
 from .models import User, Sessions, SessionSongs
 
@@ -55,12 +55,10 @@ def move_song(request):
     return HttpResponse('Song Moved')
 
 def delete_song(request):
-    sessionId = request.DELETE.get('sessionId')
-    songId = request.DELETE.get('songId')
-    if (sessionId is None or songId is None):
-        return HttpResponseBadRequest('Use parameters \'sessionId\' and \'songId\' to specify what to delete')
-    delete_track_in_queue(sessionId, songId)
-    return HttpResponse('Song Deleted')
+    song_id = request.GET.get('song_id')
+    if not is_string_valid(song_id):
+        return HttpResponseBadRequest('Use parameter \'song_id\' to specify the song_id to delete')
+    return delete_track_in_queue(song_id)
 
 def get_queue(request):
     session_id = request.GET.get('session_id')
