@@ -6,7 +6,7 @@ import json
 from kickback.apps.core.manager.helper import is_string_valid
 from kickback.apps.core.manager.search import search_tracks_by_query
 from kickback.apps.core.manager.get_queue import get_tracks_in_queue
-from kickback.apps.core.manager.moveSong import move_track_in_queue
+from kickback.apps.core.manager.move_song import move_track_in_queue
 from kickback.apps.core.manager.delete_song import delete_track_in_queue
 
 from .models import User, Sessions, SessionSongs
@@ -46,13 +46,11 @@ def add_song(request):
     return HttpResponse('Song added!')
 
 def move_song(request):
-    sessionId = request.POST.get('sessionId')
-    moveSong = request.POST.get('moveSongId')
-    afterSong = request.POST.get('afterSongId')
-    if (sessionId is None or moveSong is None or afterSong is None):
-        return HttpResponseBadRequest('Use parameters \'sessionId\', \'moveSongId\', and \'afterSongId\' to specify what to move')
-    move_track_in_queue(sessionId, moveSong, afterSong)
-    return HttpResponse('Song Moved')
+    move_song_id = request.GET.get('move_song_id')
+    after_song_id = request.GET.get('after_song_id')
+    if not is_string_valid(move_song_id):
+        return HttpResponseBadRequest('Use parameters \'move_song_id\' and \'after_song_id\' to specify the track to move')
+    return move_track_in_queue(move_song_id, after_song_id)
 
 def delete_song(request):
     song_id = request.GET.get('song_id')
