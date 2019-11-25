@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServer
 from django.views.decorators.http import require_http_methods
 from django.db import transaction, connection
 import json
-from kickback.apps.core.manager.helper import is_string_valid
+from kickback.apps.core.manager.helper import is_string_valid, test_graphene_db
 from kickback.apps.core.manager.search import search_tracks_by_query
 from kickback.apps.core.manager.get_queue import get_tracks_in_queue
 from kickback.apps.core.manager.add_song import add_track_in_queue
@@ -50,3 +50,6 @@ def get_queue(request):
         return HttpResponseBadRequest('Use paramter \'session_id\' to specify session_id for the queue')
     tracks = get_tracks_in_queue(session_id)
     return HttpResponse(json.dumps(tracks), content_type='application/json')
+
+def test(request):
+    return HttpResponse(json.dumps(test_graphene_db()), content_type='application/json')

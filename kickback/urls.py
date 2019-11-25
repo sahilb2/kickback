@@ -23,4 +23,5 @@ urlpatterns = [
     re_path(r'^move_song/$', kickback.apps.core.views.move_song, name="move_song"),
     re_path(r'^delete_song/$', kickback.apps.core.views.delete_song, name="delete_song"),
     re_path(r'^get_queue/$', kickback.apps.core.views.get_queue, name="get_queue"),
+    re_path(r'^test/$', kickback.apps.core.views.test, name="test"),
 ]
