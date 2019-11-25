@@ -54,4 +54,7 @@ def test_graphene_db():
     session.run("CREATE (n:Person {name:'Bob'})")
     result = session.run("MATCH (n:Person) RETURN n.name AS name")
     session.close()
-    return result
+    ret = []
+    for record in result:
+        ret.append(record['name'])
+    return ret
