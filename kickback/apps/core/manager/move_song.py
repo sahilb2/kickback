@@ -42,7 +42,7 @@ def move_track_in_queue(move_song_id, after_song_id):
         prev_after_song_id = prev_after_song_query[0].song_id
 
     else:
-        prev_after_song_query = SessionSongs.objects.raw('SELECT * FROM core_sessionsongs WHERE session_id_id = %s AND next_song_id IS NULL', [move_song.session_id_id])
+        prev_after_song_query = SessionSongs.objects.raw('SELECT * FROM core_sessionsongs WHERE session_id = %s AND next_song_id IS NULL', [move_song.session_id])
 
         if len(prev_after_song_query) != 1:
             HttpResponseServerError('Did not find exactly one song at the end.')

@@ -2,7 +2,7 @@ from kickback.apps.core.models import User, SessionSongs
 from kickback.apps.core.manager.helper import batch_get_track_from_uri, convert_spotify_track_to_kickback_track
 
 def get_tracks_in_queue(session_id):
-    track_list = SessionSongs.objects.raw('SELECT * FROM core_sessionsongs WHERE session_id_id = %s', [session_id])
+    track_list = SessionSongs.objects.raw('SELECT * FROM core_sessionsongs WHERE session_id = %s', [session_id])
 
     if len(track_list) == 0:
         return []

@@ -11,7 +11,7 @@ class Sessions(models.Model):
 
 class SessionSongs(models.Model):
     song_id = models.AutoField(auto_created=True, primary_key=True, verbose_name='Song ID')
-    session_id = models.ForeignKey(Sessions, on_delete=models.CASCADE, verbose_name='Session ID')
+    session = models.ForeignKey(Sessions, on_delete=models.CASCADE, verbose_name='Session ID')
     spotify_uri = models.CharField(max_length=22, blank=False, verbose_name='Song URI')
     next_song_id = models.IntegerField(blank=True, null=True, verbose_name='Next Song ID')
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=False, verbose_name='Added By User')
