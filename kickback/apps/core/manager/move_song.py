@@ -17,11 +17,14 @@ def move_track_in_queue(move_song_id, after_song_id):
     prev_move_song_query = SessionSongs.objects.raw('SELECT * FROM core_sessionsongs WHERE next_song_id = %s', [move_song_id])
 
     if len(prev_move_song_query) != 1:
-        HttpResponseServerError('Did not find exactly one song before move_song.')
+        return HttpResponseServerError('Did not find exactly one song before move_song.')
 
     prev_move_song_id = prev_move_song_query[0].song_id
 
     if after_song_id is not None:
+        if move_song_id == after_song_id:
+            return HttpResponseBadRequest('Move song and after song are the same. Enter different move_song_id and after_song_id.')
+
         after_song_query = SessionSongs.objects.raw('SELECT * FROM core_sessionsongs WHERE song_id = %s', [after_song_id])
 
         if len(after_song_query) != 1:
@@ -37,7 +40,7 @@ def move_track_in_queue(move_song_id, after_song_id):
         prev_after_song_query = SessionSongs.objects.raw('SELECT * FROM core_sessionsongs WHERE next_song_id = %s', [after_song_id])
 
         if len(prev_after_song_query) != 1:
-            HttpResponseServerError('Did not find exactly one song before after_song.')
+            return HttpResponseServerError('Did not find exactly one song before after_song.')
 
         prev_after_song_id = prev_after_song_query[0].song_id
 
@@ -45,7 +48,7 @@ def move_track_in_queue(move_song_id, after_song_id):
         prev_after_song_query = SessionSongs.objects.raw('SELECT * FROM core_sessionsongs WHERE session_id = %s AND next_song_id IS NULL', [move_song.session_id])
 
         if len(prev_after_song_query) != 1:
-            HttpResponseServerError('Did not find exactly one song at the end.')
+            return HttpResponseServerError('Did not find exactly one song at the end.')
 
         prev_after_song_id = prev_after_song_query[0].song_id
 
