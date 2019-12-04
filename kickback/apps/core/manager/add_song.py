@@ -24,4 +24,4 @@ def add_track_in_queue(session_id, spotify_uri, username):
             # New song is the only song in the queue, so make it the current song
             cursor.execute('INSERT INTO core_currentsongs(session_id, song_id) VALUES (%s, %s)', [session_id, new_last_song_id])
 
-    return HttpResponse('Song added with song_id: ' + next_song_id)
+    return HttpResponse('Song added with song_id: ' + str(new_last_song_id))

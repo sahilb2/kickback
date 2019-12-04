@@ -3,7 +3,7 @@ from django.db import transaction, connection
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 
 @transaction.atomic
-def move_track_in_queue(move_song_id, after_song_id):
+def move_track_in_queue(session_id, move_song_id, after_song_id):
     move_song_query = SessionSongs.objects.raw('SELECT * FROM core_sessionsongs WHERE song_id = %s', [move_song_id])
 
     if len(move_song_query) != 1:
@@ -11,7 +11,7 @@ def move_track_in_queue(move_song_id, after_song_id):
 
     move_song = move_song_query[0]
 
-    curr_song_id = CurrentSongs.objects.raw('SELECT * FROM core_currentsongs WHERE session_id = %s')[0].song_id
+    curr_song_id = CurrentSongs.objects.raw('SELECT * FROM core_currentsongs WHERE session_id = %s', [session_id])[0].song_id
 
     if move_song.song_id == curr_song_id:
         return HttpResponseBadRequest('Move song is the current song. Cannot move the current song.')

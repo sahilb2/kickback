@@ -32,9 +32,10 @@ def add_song(request):
 def move_song(request):
     move_song_id = request.GET.get('move_song_id')
     after_song_id = request.GET.get('after_song_id')
-    if not is_string_valid(move_song_id):
-        return HttpResponseBadRequest('Use parameters \'move_song_id\' and \'after_song_id\' to specify the track to move')
-    return move_track_in_queue(move_song_id, after_song_id)
+    session_id = request.GET.get('session_id')
+    if not (is_string_valid(move_song_id) and is_string_valid(session_id)):
+        return HttpResponseBadRequest('Use parameters \'session_id\', \'move_song_id\', and \'after_song_id\' to specify the track to move')
+    return move_track_in_queue(session_id, move_song_id, after_song_id)
 
 def delete_song(request):
     song_id = request.GET.get('song_id')
