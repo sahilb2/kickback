@@ -10,7 +10,7 @@ from kickback.apps.core.manager.add_song import add_track_in_queue
 from kickback.apps.core.manager.move_song import move_track_in_queue
 from kickback.apps.core.manager.delete_song import delete_track_in_queue
 from kickback.apps.core.manager.user import create_user_in_db, delete_user_in_db, validate_user_in_db, follow_user_in_db, unfollow_user_in_db
-from kickback.apps.core.manager.session import create_session_in_db
+from kickback.apps.core.manager.session import create_session_in_db, validate_session_in_db, end_session_in_db
 
 def index(request):
     return HttpResponse('Team Frabric presents Kickback Backend!')
@@ -25,11 +25,11 @@ def search(request):
 def add_song(request):
     session_id = request.GET.get('session_id')
     spotify_uri = request.GET.get('uri')
-    user_id = request.GET.get('user_id')
-    if not (is_string_valid(session_id) and is_string_valid(spotify_uri) and is_string_valid(user_id)):
+    username = request.GET.get('username')
+    if not (is_string_valid(session_id) and is_string_valid(spotify_uri) and is_string_valid(username)):
         return HttpResponseBadRequest('Use paramter \'session_id\' to specify session_id,' +
-         '\'uri\' to specify the Spotify URI of the track, and \'user_id\' to specify username of the user who added the song')
-    return add_track_in_queue(session_id, spotify_uri, user_id)
+         '\'uri\' to specify the Spotify URI of the track, and \'username\' to specify username of the user who added the song')
+    return add_track_in_queue(session_id, spotify_uri, username)
 
 def move_song(request):
     move_song_id = request.GET.get('move_song_id')
@@ -97,7 +97,14 @@ def create_session(request):
     return create_session_in_db(session_id, session_name, owner, session_password)
 
 def validate_session(request):
-    pass
+    session_id = request.GET.get('session_id')
+    session_password = request.GET.get('session_password')
+    if not is_string_valid(session_id):
+        return HttpResponseBadRequest('Use parameters \'session_id\' (required) and \'session_password\' to validate a session')
+    return validate_session_in_db(session_id, session_password)
 
 def end_session(request):
-    pass
+    session_id = request.GET.get('session_id')
+    if not is_string_valid(session_id):
+        return HttpResponseBadRequest('Use parameters \'session_id\' (required) to end a session')
+    return end_session_in_db(session_id)

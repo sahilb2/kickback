@@ -15,4 +15,4 @@ class SessionSongs(models.Model):
 
 class CurrentSongs(models.Model):
     session = models.OneToOneField(Sessions, on_delete=models.CASCADE, verbose_name='Session ID')
-    song = models.ForeignKey(SessionSongs, on_delete=models.PROTECT, verbose_name='Song ID')
+    song = models.ForeignKey(SessionSongs, on_delete=models.CASCADE, verbose_name='Song ID')

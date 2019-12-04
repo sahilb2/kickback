@@ -27,21 +27,32 @@ def build_session_name(session_id):
 
 @transaction.atomic
 def create_session_in_db(session_id, session_name, owner, session_password):
+    if not is_owner_valid(owner):
+        return HttpResponseBadRequest('User has already started another session. End the existing session to create a new one.')
+    if not is_session_id_valid(session_id):
+        return HttpResponseBadRequest('Session ID is already taken. Enter another session_id or none to choose a random session_id.')
     if session_id is None:
         session_id = build_random_session_id()
     if session_name is None:
         session_name = build_session_name(session_id)
-
-    # Make sure only uppercase letters are stored in the database to make session_id case insensitive
-    session_id = session_id.upper()
-
-    if not is_session_id_valid(session_id):
-        return HttpResponseBadRequest('Session ID is already taken. Enter another session_id or none to choose a random session_id.')
-    if not is_owner_valid(owner):
-        return HttpResponseBadRequest('User has already started another session. End the existing session to create a new one.')
 
     with connection.cursor() as cursor:
         cursor.execute('INSERT INTO core_sessions(session_id, session_name, owner, session_password) VALUES (%s, %s, %s, %s)',
             [session_id, session_name, owner, session_password])
 
     return HttpResponse('Session created with session_id: ' + str(session_id))
+
+def validate_session_in_db(session_id, session_password):
+    session_query = Sessions.objects.raw('SELECT * FROM core_sessions WHERE session_id=%s', [session_id])
+    if len(session_query) == 1 and ((session_query[0].session_password is None) or (session_query[0].session_password == session_password)):
+        return HttpResponse('The session is valid to join.')
+    return HttpResponseBadRequest('The session is not valid.')
+
+@transaction.atomic
+def end_session_in_db(session_id):
+    with connection.cursor() as cursor:
+        # Need to run all DELETE queries since we cannot use the ForeignKey's CASCADE when using raw SQL quries in Django
+        cursor.execute('DELETE FROM core_currentsongs WHERE session_id=%s', [session_id])
+        cursor.execute('DELETE FROM core_sessionsongs WHERE session_id=%s', [session_id])
+        cursor.execute('DELETE FROM core_sessions WHERE session_id=%s', [session_id])
+    return HttpResponse('Session ' + str(session_id) + ' has ended.')
