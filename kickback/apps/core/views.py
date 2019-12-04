@@ -10,8 +10,6 @@ from kickback.apps.core.manager.add_song import add_track_in_queue
 from kickback.apps.core.manager.move_song import move_track_in_queue
 from kickback.apps.core.manager.delete_song import delete_track_in_queue
 
-from .models import User, Sessions, SessionSongs
-
 def index(request):
     return HttpResponse('Team Frabric presents Kickback Backend!')
 
