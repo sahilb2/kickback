@@ -3,12 +3,13 @@ from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServer
 from django.views.decorators.http import require_http_methods
 from django.db import transaction, connection
 import json
-from kickback.apps.core.manager.helper import is_string_valid, test_graphene_db
+from kickback.apps.core.manager.helper import is_string_valid
 from kickback.apps.core.manager.search import search_tracks_by_query
 from kickback.apps.core.manager.get_queue import get_tracks_in_queue
 from kickback.apps.core.manager.add_song import add_track_in_queue
 from kickback.apps.core.manager.move_song import move_track_in_queue
 from kickback.apps.core.manager.delete_song import delete_track_in_queue
+from kickback.apps.core.manager.user import create_user_in_db, delete_user_in_db, validate_user_in_db, follow_user_in_db, unfollow_user_in_db
 
 def index(request):
     return HttpResponse('Team Frabric presents Kickback Backend!')
@@ -50,5 +51,37 @@ def get_queue(request):
     tracks = get_tracks_in_queue(session_id)
     return HttpResponse(json.dumps(tracks), content_type='application/json')
 
-def test(request):
-    return HttpResponse(json.dumps(test_graphene_db()), content_type='application/json')
+def create_user(request):
+    username = request.GET.get('username')
+    password = request.GET.get('password')
+    if not (is_string_valid(username) and is_string_valid(password)):
+        return HttpResponseBadRequest('Use parameters \'username\' and \'password\' to create a user')
+    return create_user_in_db(username, password)
+
+def delete_user(request):
+    username = request.GET.get('username')
+    password = request.GET.get('password')
+    if not (is_string_valid(username) and is_string_valid(password)):
+        return HttpResponseBadRequest('Use parameters \'username\' and \'password\' to delete a user')
+    return delete_user_in_db(username, password)
+
+def validate_user(request):
+    username = request.GET.get('username')
+    password = request.GET.get('password')
+    if not (is_string_valid(username) and is_string_valid(password)):
+        return HttpResponseBadRequest('Use parameters \'username\' and \'password\' to validate a user')
+    return validate_user_in_db(username, password)
+
+def follow_user(request):
+    follower = request.GET.get('follower')
+    following = request.GET.get('following')
+    if not (is_string_valid(follower) and is_string_valid(following)):
+        return HttpResponseBadRequest('Use parameters \'follower\' and \'following\' to follow a user')
+    return follow_user_in_db(follower, following)
+
+def unfollow_user(request):
+    follower = request.GET.get('follower')
+    following = request.GET.get('following')
+    if not (is_string_valid(follower) and is_string_valid(following)):
+        return HttpResponseBadRequest('Use parameters \'follower\' and \'following\' to unfollow a user')
+    return unfollow_user_in_db(follower, following)

@@ -18,10 +18,17 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 
     path("", kickback.apps.core.views.index, name="index"),
+
     re_path(r'^search/$', kickback.apps.core.views.search, name="search"),
+
     re_path(r'^add_song/$', kickback.apps.core.views.add_song, name="add_song"),
     re_path(r'^move_song/$', kickback.apps.core.views.move_song, name="move_song"),
     re_path(r'^delete_song/$', kickback.apps.core.views.delete_song, name="delete_song"),
     re_path(r'^get_queue/$', kickback.apps.core.views.get_queue, name="get_queue"),
-    re_path(r'^test/$', kickback.apps.core.views.test, name="test"),
+
+    re_path(r'^create_user/$', kickback.apps.core.views.create_user, name="create_user"),
+    re_path(r'^delete_user/$', kickback.apps.core.views.delete_user, name="delete_user"),
+    re_path(r'^validate_user/$', kickback.apps.core.views.validate_user, name="validate_user"),
+    re_path(r'^follow_user/$', kickback.apps.core.views.follow_user, name="follow_user"),
+    re_path(r'^unfollow_user/$', kickback.apps.core.views.unfollow_user, name="unfollow_user"),
 ]
