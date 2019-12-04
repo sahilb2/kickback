@@ -10,6 +10,7 @@ from kickback.apps.core.manager.add_song import add_track_in_queue
 from kickback.apps.core.manager.move_song import move_track_in_queue
 from kickback.apps.core.manager.delete_song import delete_track_in_queue
 from kickback.apps.core.manager.user import create_user_in_db, delete_user_in_db, validate_user_in_db, follow_user_in_db, unfollow_user_in_db
+from kickback.apps.core.manager.session import create_session_in_db
 
 def index(request):
     return HttpResponse('Team Frabric presents Kickback Backend!')
@@ -85,3 +86,18 @@ def unfollow_user(request):
     if not (is_string_valid(follower) and is_string_valid(following)):
         return HttpResponseBadRequest('Use parameters \'follower\' and \'following\' to unfollow a user')
     return unfollow_user_in_db(follower, following)
+
+def create_session(request):
+    session_id = request.GET.get('session_id')
+    session_name = request.GET.get('session_name')
+    owner = request.GET.get('owner')
+    session_password = request.GET.get('session_password')
+    if not is_string_valid(owner):
+        return HttpResponseBadRequest('Use parameters \'session_id\', \'session_name\', \'owner\' (required), and \'session_password\' to create a session')
+    return create_session_in_db(session_id, session_name, owner, session_password)
+
+def validate_session(request):
+    pass
+
+def end_session(request):
+    pass
