@@ -4,3 +4,4 @@ django-heroku
 spotipy
 django-cors-headers
 neo4j-driver
+requests
