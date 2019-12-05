@@ -11,6 +11,7 @@ from kickback.apps.core.manager.move_song import move_track_in_queue
 from kickback.apps.core.manager.delete_song import delete_track_in_queue
 from kickback.apps.core.manager.user import create_user_in_db, delete_user_in_db, validate_user_in_db, follow_user_in_db, unfollow_user_in_db, get_following_for_user
 from kickback.apps.core.manager.session import create_session_in_db, validate_session_in_db, end_session_in_db, get_owned_session_in_db, play_next_song_in_db
+from kickback.apps.core.manager.chat import add_to_chat_for_session, retrieve_chat_for_session
 
 def index(request):
     return HttpResponse('Team Frabric presents Kickback Backend!')
@@ -27,7 +28,7 @@ def add_song(request):
     spotify_uri = request.GET.get('uri')
     username = request.GET.get('username')
     if not (is_string_valid(session_id) and is_string_valid(spotify_uri) and is_string_valid(username)):
-        return HttpResponseBadRequest('Use paramter \'session_id\' to specify session_id,' +
+        return HttpResponseBadRequest('Use parameter \'session_id\' to specify session_id,' +
          '\'uri\' to specify the Spotify URI of the track, and \'username\' to specify username of the user who added the song')
     return add_track_in_queue(session_id, spotify_uri, username)
 
@@ -48,7 +49,7 @@ def delete_song(request):
 def get_queue(request):
     session_id = request.GET.get('session_id')
     if not is_string_valid(session_id):
-        return HttpResponseBadRequest('Use paramter \'session_id\' to specify session_id for the queue')
+        return HttpResponseBadRequest('Use parameter \'session_id\' to specify session_id for the queue')
     tracks = get_tracks_in_queue(session_id)
     return HttpResponse(json.dumps(tracks), content_type='application/json')
 
@@ -126,3 +127,17 @@ def play_next_song(request):
     if not is_string_valid(session_id):
         return HttpResponseBadRequest('Use parameters \'session_id\' to play next song in a session')
     return play_next_song_in_db(session_id)
+
+def add_to_chat(request):
+    session_id = request.GET.get('session_id')
+    message = request.GET.get('message')
+    username = request.GET.get('username')
+    if not (is_string_valid(session_id) and is_string_valid(message) and is_string_valid(username)):
+        return HttpResponseBadRequest('Use parameter \'session_id\', \'message\', and \'username\' to add to chat')
+    return add_to_chat_for_session(session_id, message, username)
+
+def retrieve_chat(request):
+    session_id = request.GET.get('session_id')
+    if not is_string_valid(session_id):
+        return HttpResponseBadRequest('Use parameters \'session_id\' to retrieve chat for a session')
+    return retrieve_chat_for_session(session_id)
