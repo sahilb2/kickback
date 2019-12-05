@@ -12,4 +12,10 @@ def add_to_chat_for_session(session_id, message, username):
 
 def retrieve_chat_for_session(session_id):
     chat_query = ChatMessages.objects.raw('SELECT * FROM core_chatmessages WHERE session_id=%s ORDER BY message_id', [session_id])
-    return HttpResponse(json.dumps(chat_query), content_type='application/json')
+    chats = []
+    for chat in chat_query:
+        message = {}
+        message['username'] = chat.username
+        message['message'] = chat.message
+        chats.append(message)
+    return HttpResponse(json.dumps(chats), content_type='application/json')

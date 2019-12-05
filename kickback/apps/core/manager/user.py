@@ -76,6 +76,7 @@ def unfollow_user_in_db(follower, following):
 
 def get_following_for_user(username):
     following_users = []
+    owner_followers = set()
 
     session = driver.session()
     following_users_query = session.run("""
@@ -103,21 +104,21 @@ def get_following_for_user(username):
     for session in sessions_query:
         spotify_uri_list.append(session.spotify_uri)
 
-    spotify_track_list_info = batch_get_track_from_uri(spotify_uri_list)
-    track_list_info = list(map(convert_spotify_track_to_kickback_track, spotify_track_list_info['tracks']))
+    if len(spotify_uri_list) > 0:
+        spotify_track_list_info = batch_get_track_from_uri(spotify_uri_list)
+        track_list_info = list(map(convert_spotify_track_to_kickback_track, spotify_track_list_info['tracks']))
 
-    spotify_uri_to_track_info = {}
-    for track in track_list_info:
-        spotify_uri_to_track_info[track['uri']] = track
+        spotify_uri_to_track_info = {}
+        for track in track_list_info:
+            spotify_uri_to_track_info[track['uri']] = track
 
-    owner_followers = set()
-    for session in sessions_query:
-        owner_info = {}
-        owner_info['session_id'] = session.session_id
-        owner_info['session_name'] = session.session_name
-        owner_info['now_playing'] = spotify_uri_to_track_info[session.spotify_uri]
-        following_users.append({session.owner: owner_info})
-        owner_followers.add(session.owner)
+        for session in sessions_query:
+            owner_info = {}
+            owner_info['session_id'] = session.session_id
+            owner_info['session_name'] = session.session_name
+            owner_info['now_playing'] = spotify_uri_to_track_info[session.spotify_uri]
+            following_users.append({session.owner: owner_info})
+            owner_followers.add(session.owner)
 
     for user in following_user_list:
         if user not in owner_followers:
