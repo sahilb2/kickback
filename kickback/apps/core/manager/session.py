@@ -32,9 +32,9 @@ def create_session_in_db(session_id, session_name, owner, session_password):
         return HttpResponseBadRequest('User has already started another session. End the existing session to create a new one.')
     if not is_session_id_valid(session_id):
         return HttpResponseBadRequest('Session ID is already taken. Enter another session_id or none to choose a random session_id.')
-    if session_id is None:
+    if session_id is None or session_id == '':
         session_id = build_random_session_id()
-    if session_name is None:
+    if session_name is None or session_name == '':
         session_name = build_session_name(session_id)
 
     with connection.cursor() as cursor:
@@ -58,7 +58,7 @@ def validate_session_in_db(session_id, session_password):
 @transaction.atomic
 def end_session_in_db(session_id):
     with connection.cursor() as cursor:
-        # Need to run all DELETE queries since we cannot use the ForeignKey's CASCADE when using raw SQL quries in Django
+        # Need to run all DELETE queries since we cannot use the ForeignKey's CASCADE when using raw SQL queries in Django
         cursor.execute('DELETE FROM core_currentsongs WHERE session_id=%s', [session_id])
         cursor.execute('DELETE FROM core_sessionsongs WHERE session_id=%s', [session_id])
         cursor.execute('DELETE FROM core_sessions WHERE session_id=%s', [session_id])
