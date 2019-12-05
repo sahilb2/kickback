@@ -1,7 +1,18 @@
 from kickback.apps.core.models import SessionSongs, CurrentSongs
 from kickback.apps.core.manager.sockets import call_socket_for_update_queue
+from kickback.apps.core.manager.chat import add_to_chat_for_session
+from kickback.apps.core.manager.helper import batch_get_track_from_uri, convert_spotify_track_to_kickback_track
 from django.db import transaction, connection
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
+
+def create_add_song_chat_message(song_name, username):
+    return str(username) + ' added song ' + str(song_name) + ' to the queue.'
+
+def trigger_add_song_message_to_chat(session_id, spotify_uri, username):
+    spotify_track = batch_get_track_from_uri([spotify_uri])['tracks'][0]
+    song_name = convert_spotify_track_to_kickback_track(spotify_track)['name']
+    message = create_add_song_chat_message(song_name, username)
+    add_to_chat_for_session(session_id, message, 'Kickback')
 
 @transaction.atomic
 def add_track_in_queue(session_id, spotify_uri, username):
@@ -26,5 +37,7 @@ def add_track_in_queue(session_id, spotify_uri, username):
             cursor.execute('INSERT INTO core_currentsongs(session_id, song_id) VALUES (%s, %s)', [session_id, new_last_song_id])
 
     call_socket_for_update_queue(session_id)
+
+    trigger_add_song_message_to_chat(session_id, spotify_uri, username)
 
     return HttpResponse('Song added with song_id: ' + str(new_last_song_id))
