@@ -37,4 +37,5 @@ urlpatterns = [
     re_path(r'^validate_session/$', kickback.apps.core.views.validate_session, name="validate_session"),
     re_path(r'^end_session/$', kickback.apps.core.views.end_session, name="end_session"),
     re_path(r'^get_owned_session/$', kickback.apps.core.views.get_owned_session, name="get_owned_session"),
+    re_path(r'^play_next_song/$', kickback.apps.core.views.play_next_song, name="play_next_song"),
 ]

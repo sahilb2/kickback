@@ -1,7 +1,7 @@
 import random
 import string
 import json
-from kickback.apps.core.models import Sessions
+from kickback.apps.core.models import Sessions, CurrentSongs, SessionSongs
 from django.db import transaction, connection
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 
@@ -71,3 +71,22 @@ def get_owned_session_in_db(owner):
         session_info['session_id'] = session_query[0].session_id
         session_info['session_name'] = session_query[0].session_name
     return HttpResponse(json.dumps(session_info), content_type='application/json')
+
+def play_next_song_in_db(session_id):
+    current_song_query = CurrentSongs.objects.raw('SELECT * FROM core_currentsongs WHERE session_id = %s', [session_id])
+    if len(current_song_query) == 0:
+        return HttpResponseBadRequest('The session_id is not valid.')
+    current_song_id = current_song_query[0].song_id
+    old_current_song_query = SessionSongs.objects.raw('SELECT * FROM core_sessionsongs WHERE song_id = %s', [current_song_id])
+    if len(old_current_song_query) == 0:
+        return HttpResponseServerError('Current Song not found.')
+    new_current_song_id = old_current_song_query[0].next_song_id
+    if new_current_song_id is None:
+        with connection.cursor() as cursor:
+            cursor.execute('DELETE FROM core_currentsongs WHERE session_id=%s', [session_id])
+            cursor.execute('DELETE FROM core_sessionsongs WHERE song_id=%s', [current_song_id])
+        return HttpResponse('The queue for this session has ended.')
+    with connection.cursor() as cursor:
+        cursor.execute('UPDATE core_currentsongs SET song_id=%s WHERE session_id=%s', [new_current_song_id, session_id])
+        cursor.execute('DELETE FROM core_sessionsongs WHERE song_id=%s', [current_song_id])
+    return HttpResponse('Now playing song_id: ' + str(new_current_song_id))
