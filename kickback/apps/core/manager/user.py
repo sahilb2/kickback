@@ -77,7 +77,7 @@ def unfollow_user_in_db(follower, following):
 def get_following_helper(username):
     session = driver.session()
     following_users_query = session.run("""
-        MATCH (a:User {username: $username})-[r:FOLLOWS]->(b:User)
+        MATCH (a:User {username: $username})<-[r:FOLLOWS]-(b:User)
         RETURN b.username as username
     """, username=username)
     session.close()
