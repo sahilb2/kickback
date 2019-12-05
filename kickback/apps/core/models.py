@@ -16,3 +16,9 @@ class SessionSongs(models.Model):
 class CurrentSongs(models.Model):
     session = models.OneToOneField(Sessions, on_delete=models.CASCADE, verbose_name='Session ID')
     song = models.ForeignKey(SessionSongs, on_delete=models.CASCADE, verbose_name='Song ID')
+
+class ChatMessage(models.Model):
+    message_id = models.AutoField(auto_created=True, primary_key=True, verbose_name='Message ID')
+    message = models.TextField(blank=True, null=False, verbose_name='Chat Message')
+    username = models.CharField(max_length=20, blank=False, null=True, verbose_name='Added By User')
+    session = models.ForeignKey(Sessions, on_delete=models.CASCADE, verbose_name='Session ID')
