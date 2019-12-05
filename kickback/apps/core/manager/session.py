@@ -61,13 +61,20 @@ def validate_session_in_db(session_id, session_password):
 
 @transaction.atomic
 def end_session_in_db(session_id):
+    session_query = Sessions.objects.raw('SELECT * FROM core_sessions WHERE session_id=%s', [session_id])
+
+    if len(session_query) == 0:
+        return HttpResponseBadRequest('The session_id is not valid.')
+
+    owner = session_query[0].owner
+
     with connection.cursor() as cursor:
         # Need to run all DELETE queries since we cannot use the ForeignKey's CASCADE when using raw SQL queries in Django
         cursor.execute('DELETE FROM core_currentsongs WHERE session_id=%s', [session_id])
         cursor.execute('DELETE FROM core_sessionsongs WHERE session_id=%s', [session_id])
+        cursor.execute('DELETE FROM core_chatmessages WHERE session_id=%s', [session_id])
         cursor.execute('DELETE FROM core_sessions WHERE session_id=%s', [session_id])
 
-    owner = Sessions.objects.raw('SELECT owner FROM core_sessions WHERE session_id=%s', [session_id])[0].owner
     call_socket_for_update_followers(get_following_helper(owner))
 
     return HttpResponse('Session ' + str(session_id) + ' has ended.')
@@ -99,7 +106,7 @@ def play_next_song_in_db(session_id):
         cursor.execute('DELETE FROM core_sessionsongs WHERE song_id=%s', [current_song_id])
 
     call_socket_for_update_queue(session_id)
-    owner = Sessions.objects.raw('SELECT owner FROM core_sessions WHERE session_id=%s', [session_id])[0].owner
+    owner = Sessions.objects.raw('SELECT * FROM core_sessions WHERE session_id=%s', [session_id])[0].owner
     call_socket_for_update_followers(get_following_helper(owner))
 
     return HttpResponse('Now playing song_id: ' + str(new_current_song_id))
