@@ -1,5 +1,6 @@
 import random
 import string
+import json
 from kickback.apps.core.models import Sessions
 from django.db import transaction, connection
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
@@ -40,12 +41,18 @@ def create_session_in_db(session_id, session_name, owner, session_password):
         cursor.execute('INSERT INTO core_sessions(session_id, session_name, owner, session_password) VALUES (%s, %s, %s, %s)',
             [session_id, session_name, owner, session_password])
 
-    return HttpResponse('Session created with session_id: ' + str(session_id))
+    session_info = {}
+    session_info['session_id'] = session_id
+    session_info['session_name'] = session_name
+    return HttpResponse(json.dumps(session_info), content_type='application/json')
 
 def validate_session_in_db(session_id, session_password):
     session_query = Sessions.objects.raw('SELECT * FROM core_sessions WHERE session_id=%s', [session_id])
     if len(session_query) == 1 and ((session_query[0].session_password is None) or (session_query[0].session_password == session_password)):
-        return HttpResponse('The session is valid to join.')
+        session_info = {}
+        session_info['session_id'] = session_id
+        session_info['session_name'] = session_query[0].session_name
+        return HttpResponse(json.dumps(session_info), content_type='application/json')
     return HttpResponseBadRequest('The session is not valid.')
 
 @transaction.atomic
