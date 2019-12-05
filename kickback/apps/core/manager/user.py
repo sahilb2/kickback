@@ -1,6 +1,9 @@
 import os
 import time
+import json
 from neo4j.v1 import GraphDatabase, basic_auth
+from kickback.apps.core.models import Sessions, CurrentSongs
+from kickback.apps.core.manager.helper import batch_get_track_from_uri, convert_spotify_track_to_kickback_track
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 
 # Graphene DB Credentials
@@ -70,3 +73,54 @@ def unfollow_user_in_db(follower, following):
     """, follower=follower, following=following)
     session.close()
     return HttpResponse('User ' + str(follower) + ' has unfollowed ' + str(following))
+
+def get_following_for_user(username):
+    following_users = []
+
+    session = driver.session()
+    following_users_query = session.run("""
+        MATCH (a:User {username: $username})-[r:FOLLOWS]->(b:User)
+        RETURN b.username as username
+    """, username=username)
+    session.close()
+
+    following_user_list = []
+    for following_user in following_users_query:
+        following_user_list.append(following_user['username'])
+
+    if len(following_user_list) == 0:
+        return HttpResponse(json.dumps([]), content_type='application/json')
+
+    sessions_query = Sessions.objects.raw("""
+        SELECT s.session_id, s.session_name, s.owner, ss.spotify_uri
+        FROM core_sessions s
+        INNER JOIN core_currentsongs c ON s.session_id = c.session_id
+        INNER JOIN core_sessionsongs ss ON c.song_id = ss.song_id
+        WHERE s.owner IN %s
+    """, [tuple(following_user_list)])
+
+    spotify_uri_list = []
+    for session in sessions_query:
+        spotify_uri_list.append(session.spotify_uri)
+
+    spotify_track_list_info = batch_get_track_from_uri(spotify_uri_list)
+    track_list_info = list(map(convert_spotify_track_to_kickback_track, spotify_track_list_info['tracks']))
+
+    spotify_uri_to_track_info = {}
+    for track in track_list_info:
+        spotify_uri_to_track_info[track['uri']] = track
+
+    owner_followers = set()
+    for session in sessions_query:
+        owner_info = {}
+        owner_info['session_id'] = session.session_id
+        owner_info['session_name'] = session.session_name
+        owner_info['now_playing'] = spotify_uri_to_track_info[session.spotify_uri]
+        following_users.append({session.owner: owner_info})
+        owner_followers.add(session.owner)
+
+    for user in following_user_list:
+        if user not in owner_followers:
+            following_users.append({user: {}})
+
+    return HttpResponse(json.dumps(following_users), content_type='application/json')

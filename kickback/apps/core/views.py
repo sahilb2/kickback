@@ -9,7 +9,7 @@ from kickback.apps.core.manager.get_queue import get_tracks_in_queue
 from kickback.apps.core.manager.add_song import add_track_in_queue
 from kickback.apps.core.manager.move_song import move_track_in_queue
 from kickback.apps.core.manager.delete_song import delete_track_in_queue
-from kickback.apps.core.manager.user import create_user_in_db, delete_user_in_db, validate_user_in_db, follow_user_in_db, unfollow_user_in_db
+from kickback.apps.core.manager.user import create_user_in_db, delete_user_in_db, validate_user_in_db, follow_user_in_db, unfollow_user_in_db, get_following_for_user
 from kickback.apps.core.manager.session import create_session_in_db, validate_session_in_db, end_session_in_db, get_owned_session_in_db
 
 def index(request):
@@ -86,6 +86,12 @@ def unfollow_user(request):
     if not (is_string_valid(follower) and is_string_valid(following)):
         return HttpResponseBadRequest('Use parameters \'follower\' and \'following\' to unfollow a user')
     return unfollow_user_in_db(follower, following)
+
+def get_following(request):
+    username = request.GET.get('username')
+    if not is_string_valid(username):
+        return HttpResponseBadRequest('Use parameters \'username\' to get following for a user')
+    return get_following_for_user(username)
 
 def create_session(request):
     session_id = request.GET.get('session_id')
