@@ -11,14 +11,14 @@ class SessionSongs(models.Model):
     spotify_uri = models.CharField(max_length=22, blank=False, verbose_name='Song URI')
     next_song_id = models.IntegerField(blank=True, null=True, verbose_name='Next Song ID')
     session = models.ForeignKey(Sessions, on_delete=models.CASCADE, verbose_name='Session ID')
-    username = models.CharField(max_length=20, blank=False, null=True, verbose_name='Added By User')
+    username = models.CharField(max_length=255, blank=False, null=True, verbose_name='Added By User')
 
 class CurrentSongs(models.Model):
     session = models.OneToOneField(Sessions, on_delete=models.CASCADE, verbose_name='Session ID')
     song = models.ForeignKey(SessionSongs, on_delete=models.CASCADE, verbose_name='Song ID')
 
-class ChatMessage(models.Model):
+class ChatMessages(models.Model):
     message_id = models.AutoField(auto_created=True, primary_key=True, verbose_name='Message ID')
     message = models.TextField(blank=True, null=False, verbose_name='Chat Message')
-    username = models.CharField(max_length=20, blank=False, null=True, verbose_name='Added By User')
+    username = models.CharField(max_length=255, blank=False, null=True, verbose_name='Added By User')
     session = models.ForeignKey(Sessions, on_delete=models.CASCADE, verbose_name='Session ID')
