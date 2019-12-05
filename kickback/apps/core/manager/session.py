@@ -2,6 +2,7 @@ import random
 import string
 import json
 from kickback.apps.core.models import Sessions, CurrentSongs, SessionSongs
+from kickback.apps.core.manager.chat import add_to_chat_for_session
 from kickback.apps.core.manager.sockets import call_socket_for_update_queue, call_socket_for_update_followers
 from kickback.apps.core.manager.user import get_following_helper
 from django.db import transaction, connection
@@ -28,6 +29,13 @@ def build_random_session_id():
 def build_session_name(session_id):
     return 'Kickback Session ' + str(session_id)
 
+def create_new_session_chat_message(owner, session_id, session_name):
+    return str(owner) + ' started a new session \"' + str(session_name) + '\" with Session ID \"' + str(session_id) + '\".'
+
+def trigger_create_session_message_to_chat(owner, session_id, session_name):
+    message = create_new_session_chat_message(owner, session_id, session_name)
+    add_to_chat_for_session(session_id, message, 'Kickback')
+
 @transaction.atomic
 def create_session_in_db(session_id, session_name, owner, session_password):
     if not is_owner_valid(owner):
@@ -44,6 +52,8 @@ def create_session_in_db(session_id, session_name, owner, session_password):
             [session_id, session_name, owner, session_password])
 
     call_socket_for_update_followers(get_following_helper(owner))
+
+    trigger_create_session_message_to_chat(owner, session_id, session_name)
 
     session_info = {}
     session_info['session_id'] = session_id
