@@ -1,4 +1,5 @@
 from kickback.apps.core.models import SessionSongs, CurrentSongs
+from kickback.apps.core.manager.sockets import call_socket_for_update_queue
 from django.db import transaction, connection
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 
@@ -69,5 +70,7 @@ def move_track_in_queue(session_id, move_song_id, after_song_id):
                           SET next_song_id = %s
                           WHERE song_id = %s
                        """, [move_song_id, prev_after_song_id])
+
+    call_socket_for_update_queue(session_id)
 
     return HttpResponse('Moved song!')

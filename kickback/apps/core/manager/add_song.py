@@ -1,4 +1,5 @@
 from kickback.apps.core.models import SessionSongs, CurrentSongs
+from kickback.apps.core.manager.sockets import call_socket_for_update_queue
 from django.db import transaction, connection
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 
@@ -23,5 +24,7 @@ def add_track_in_queue(session_id, spotify_uri, username):
         else:
             # New song is the only song in the queue, so make it the current song
             cursor.execute('INSERT INTO core_currentsongs(session_id, song_id) VALUES (%s, %s)', [session_id, new_last_song_id])
+
+    call_socket_for_update_queue(session_id)
 
     return HttpResponse('Song added with song_id: ' + str(new_last_song_id))

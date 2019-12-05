@@ -2,6 +2,8 @@ import random
 import string
 import json
 from kickback.apps.core.models import Sessions, CurrentSongs, SessionSongs
+from kickback.apps.core.manager.sockets import call_socket_for_update_queue, call_socket_for_update_followers
+from kickback.apps.core.manager.user import get_following_helper
 from django.db import transaction, connection
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 
@@ -41,6 +43,8 @@ def create_session_in_db(session_id, session_name, owner, session_password):
         cursor.execute('INSERT INTO core_sessions(session_id, session_name, owner, session_password) VALUES (%s, %s, %s, %s)',
             [session_id, session_name, owner, session_password])
 
+    call_socket_for_update_followers(get_following_helper(owner))
+
     session_info = {}
     session_info['session_id'] = session_id
     session_info['session_name'] = session_name
@@ -62,6 +66,10 @@ def end_session_in_db(session_id):
         cursor.execute('DELETE FROM core_currentsongs WHERE session_id=%s', [session_id])
         cursor.execute('DELETE FROM core_sessionsongs WHERE session_id=%s', [session_id])
         cursor.execute('DELETE FROM core_sessions WHERE session_id=%s', [session_id])
+
+    owner = Sessions.objects.raw('SELECT owner FROM core_sessions WHERE session_id=%s', [session_id])[0].owner
+    call_socket_for_update_followers(get_following_helper(owner))
+
     return HttpResponse('Session ' + str(session_id) + ' has ended.')
 
 def get_owned_session_in_db(owner):
@@ -89,4 +97,9 @@ def play_next_song_in_db(session_id):
     with connection.cursor() as cursor:
         cursor.execute('UPDATE core_currentsongs SET song_id=%s WHERE session_id=%s', [new_current_song_id, session_id])
         cursor.execute('DELETE FROM core_sessionsongs WHERE song_id=%s', [current_song_id])
+
+    call_socket_for_update_queue(session_id)
+    owner = Sessions.objects.raw('SELECT owner FROM core_sessions WHERE session_id=%s', [session_id])[0].owner
+    call_socket_for_update_followers(get_following_helper(owner))
+
     return HttpResponse('Now playing song_id: ' + str(new_current_song_id))

@@ -74,6 +74,20 @@ def unfollow_user_in_db(follower, following):
     session.close()
     return HttpResponse('User ' + str(follower) + ' has unfollowed ' + str(following))
 
+def get_following_helper(username):
+    session = driver.session()
+    following_users_query = session.run("""
+        MATCH (a:User {username: $username})-[r:FOLLOWS]->(b:User)
+        RETURN b.username as username
+    """, username=username)
+    session.close()
+
+    following_users = []
+    for following_user in following_users_query:
+        following_users.append(following_user['username'])
+
+    return following_users
+
 def get_following_for_user(username):
     following_users = []
     owner_followers = set()
