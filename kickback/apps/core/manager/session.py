@@ -63,3 +63,11 @@ def end_session_in_db(session_id):
         cursor.execute('DELETE FROM core_sessionsongs WHERE session_id=%s', [session_id])
         cursor.execute('DELETE FROM core_sessions WHERE session_id=%s', [session_id])
     return HttpResponse('Session ' + str(session_id) + ' has ended.')
+
+def get_owned_session_in_db(owner):
+    session_info = {}
+    session_query = Sessions.objects.raw('SELECT * FROM core_sessions WHERE owner=%s', [owner])
+    if len(session_query) == 1:
+        session_info['session_id'] = session_query[0].session_id
+        session_info['session_name'] = session_query[0].session_name
+    return HttpResponse(json.dumps(session_info), content_type='application/json')

@@ -35,4 +35,5 @@ urlpatterns = [
     re_path(r'^create_session/$', kickback.apps.core.views.create_session, name="create_session"),
     re_path(r'^validate_session/$', kickback.apps.core.views.validate_session, name="validate_session"),
     re_path(r'^end_session/$', kickback.apps.core.views.end_session, name="end_session"),
+    re_path(r'^get_owned_session/$', kickback.apps.core.views.get_owned_session, name="get_owned_session"),
 ]

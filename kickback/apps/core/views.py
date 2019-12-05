@@ -10,7 +10,7 @@ from kickback.apps.core.manager.add_song import add_track_in_queue
 from kickback.apps.core.manager.move_song import move_track_in_queue
 from kickback.apps.core.manager.delete_song import delete_track_in_queue
 from kickback.apps.core.manager.user import create_user_in_db, delete_user_in_db, validate_user_in_db, follow_user_in_db, unfollow_user_in_db
-from kickback.apps.core.manager.session import create_session_in_db, validate_session_in_db, end_session_in_db
+from kickback.apps.core.manager.session import create_session_in_db, validate_session_in_db, end_session_in_db, get_owned_session_in_db
 
 def index(request):
     return HttpResponse('Team Frabric presents Kickback Backend!')
@@ -108,3 +108,9 @@ def end_session(request):
     if not is_string_valid(session_id):
         return HttpResponseBadRequest('Use parameters \'session_id\' (required) to end a session')
     return end_session_in_db(session_id)
+
+def get_owned_session(request):
+    owner = request.GET.get('owner')
+    if not is_string_valid(owner):
+        return HttpResponseBadRequest('Use parameters \'owner\' to get owned session')
+    return get_owned_session_in_db(owner)
